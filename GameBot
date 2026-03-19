@@ -1,0 +1,62 @@
+import discord
+from discord.ext import commands
+
+intents = discord.Intents.default()
+intents.message_content = True
+
+bot = commands.Bot(command_prefix='$', intents=intents)
+
+@bot.event
+async def on_ready():
+    print(f'We have logged in as {bot.user}')
+
+@bot.command()
+async def games(ctx):
+    game_message = """
+    Following game commands:
+    1. Coin Flip ($flip)\n
+    2. Dice Roll ($roll [n of sides, default 6])\n
+    3. Rock Paper Scissors ($rps)
+    """
+    await ctx.send(game_message)
+
+@bot.command()
+async def flip(ctx):
+    import random
+    coin = ['Heads', 'Tails']
+    result = random.choice(coin)
+    await ctx.send(f'The coin landed on {result}!')
+
+@bot.command()
+async def roll(ctx, sides: int = 6):
+    import random
+    result = random.randint(1, sides)
+    await ctx.send(f'You rolled a {result} on a {sides}-sided die!')
+
+@bot.command()
+async def rps(ctx):
+    import random
+    choices = ['Rock', 'Paper', 'Scissors']
+    bot_choice = random.choice(choices)
+    await ctx.send('Type your choice (Rock/Paper/Scissors) in the chat.')
+
+    def check(message):
+        return message.author == ctx.author and message.channel == ctx.channel
+    msg = await bot.wait_for('message', check=check)
+    user_choice = msg.content.capitalize()
+    if user_choice not in choices:
+        await ctx.send('Invalid choice! Please choose Rock, Paper, or Scissors.')
+        return
+    if user_choice == bot_choice:
+        result = "It's a tie!"
+    elif (user_choice == 'Rock' and bot_choice == 'Scissors') or \
+         (user_choice == 'Paper' and bot_choice == 'Rock') or \
+         (user_choice == 'Scissors' and bot_choice == 'Paper'):
+        result = "You win!"
+    else:
+        result = "I win!"
+
+    await ctx.send(f'I chose {bot_choice}. {result}')
+
+
+bot.run("")
