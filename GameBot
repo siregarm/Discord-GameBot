@@ -1,5 +1,9 @@
+import os
+
 import discord
 from discord.ext import commands
+import random
+import requests
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -17,25 +21,24 @@ async def games(ctx):
     1. Coin Flip ($flip)\n
     2. Dice Roll ($roll [n of sides, default 6])\n
     3. Rock Paper Scissors ($rps)
+    4. Random Meme ($meme)\n
+    5. Random Duck Image ($duck)
     """
     await ctx.send(game_message)
 
 @bot.command()
 async def flip(ctx):
-    import random
     coin = ['Heads', 'Tails']
     result = random.choice(coin)
     await ctx.send(f'The coin landed on {result}!')
 
 @bot.command()
 async def roll(ctx, sides: int = 6):
-    import random
     result = random.randint(1, sides)
     await ctx.send(f'You rolled a {result} on a {sides}-sided die!')
 
 @bot.command()
 async def rps(ctx):
-    import random
     choices = ['Rock', 'Paper', 'Scissors']
     bot_choice = random.choice(choices)
     await ctx.send('Type your choice (Rock/Paper/Scissors) in the chat.')
@@ -58,5 +61,24 @@ async def rps(ctx):
 
     await ctx.send(f'I chose {bot_choice}. {result}')
 
+@bot.command()
+async def meme(ctx):
+    import os
+    memes = os.listdir('playbot_images')
+    with open("playbot_images/" + random.choice(memes), 'rb') as f:
+        picture = discord.File(f)
+    await ctx.send(file=picture)
 
-bot.run("")
+def get_duck_image_url():    
+    url = 'https://random-d.uk/api/random'
+    res = requests.get(url)
+    data = res.json()
+    return data['url']
+
+@bot.command('duck')
+async def duck(ctx):
+    '''Setelah kita memanggil perintah bebek (duck), program akan memanggil fungsi get_duck_image_url'''
+    image_url = get_duck_image_url()
+    await ctx.send(image_url)
+
+bot.run("TOKEN")
